@@ -5,10 +5,15 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
+        int weeks = requestAge();
         int width = 10000;
         int height = 15000;
 
@@ -27,13 +32,15 @@ public class Main {
         drawAges(g2d);
 
         // To'g'ri to'rtburchaklar bilan rasm ichini to'ldiramiz
-        drawRectangles(g2d);
+        drawRectangles(g2d, weeks);
 
         g2d.dispose();
 
         // Saqlaymiz
         File file = new File("result.png");
         ImageIO.write(bufferedImage, "png", file);
+
+        System.out.println("Result is ready. You can check \"reslut.png\" file");
     }
 
     public static void drawAges(Graphics g) {
@@ -51,17 +58,24 @@ public class Main {
 
     }
 
-    public static void drawRectangles(Graphics g) {
+    public static void drawRectangles(Graphics g, int weeks) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.BLACK);
         g2d.setStroke(new BasicStroke(10));
         int startYPoint = 30;
+        int filledRects = 1;
         for (int i = 0; i < 100; i++) {
             int startXPoint = 1750;
             startYPoint += 146;
             for (int j = 0; j <= 51; j++) {
+                g2d.setColor(Color.BLACK);
                 startXPoint += 150;
                 g.drawRect(startXPoint, startYPoint, 100, 100);
+                if (filledRects < weeks-1) {
+                    g.setColor(Color.LIGHT_GRAY);
+                    g.fillRect(startXPoint, startYPoint, 100, 100);
+                    filledRects++;
+                }
             }
         }
     }
@@ -74,5 +88,25 @@ public class Main {
         g2d.drawLine(1500, 0, 1500, height);
         g2d.drawLine(width, height,width, 0);
         g2d.drawLine(1500, height, width, height);
+    }
+
+    public static int requestAge() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter your birthday, example: 1992-09-26");
+        String dateBeforeString = scanner.nextLine();
+        LocalDate date = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String dateAfterString = date.format(formatter);
+
+        LocalDate dateBefore = LocalDate.parse(dateBeforeString);
+        LocalDate dateAfter = LocalDate.parse(dateAfterString);
+
+        int weeksCount = (int) ChronoUnit.WEEKS.between(dateBefore, dateAfter);
+        if (weeksCount < 0) {
+            System.out.println("Please enter past date...");
+            requestAge();
+        }
+
+        return weeksCount-1;
     }
 }
